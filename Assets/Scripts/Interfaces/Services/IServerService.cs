@@ -5,5 +5,5 @@ using UnityEngine;
 public interface IServerService
 {
     void ConnectToServer();
-    void SendDiscoveryRequest();
+    byte[] SendDiscoveryRequest();
 }

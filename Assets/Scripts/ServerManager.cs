@@ -8,6 +8,9 @@ public class ServerManager : MonoBehaviour
 
     private ServerService serverService;
 
+    //Stores the last received server response
+    private byte[] currentResponse;
+
     private void Awake()
     {
         serverService = new ServerService(serverData.ip, serverData.port);
@@ -17,7 +20,7 @@ public class ServerManager : MonoBehaviour
     void Start()
     {
         serverService.ConnectToServer();
-        serverService.SendDiscoveryRequest();
+        currentResponse = serverService.SendDiscoveryRequest();
     }
 
     // Update is called once per frame

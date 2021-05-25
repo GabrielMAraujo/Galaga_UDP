@@ -34,7 +34,7 @@ public class ServerService : IServerService
     }
 
     //Sends an initial, simple request to reverse-engineer the secret and start the game
-    public void SendDiscoveryRequest()
+    public byte[] SendDiscoveryRequest()
     {
         //Discovery request is all zeroes (frame 0, instruction b00 - do nothing, first ACK is 0)
         byte[] discoveryRequest = new byte[2];
@@ -49,6 +49,8 @@ public class ServerService : IServerService
         //As it is the discovery request, extract the server secret
         ExtractSecret(responseData);
 
+        //Decodes the response using the obtained secret and returns the decoded value
+        return ByteUtils.XOR(responseData, secret);
     }
 
     //Handle the server response
