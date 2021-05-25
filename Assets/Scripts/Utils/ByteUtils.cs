@@ -9,4 +9,9 @@ public static class ByteUtils
     {
         return BitConverter.ToString(byteArray).Replace("-", " ");
     }
+
+    public static string ByteToString(byte b)
+    {
+        return BitConverter.ToString(new byte[1] { b });
+    }
 }
