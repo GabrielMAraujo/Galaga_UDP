@@ -39,8 +39,7 @@ public class ServerService : IServerService
         //Discovery request is all zeroes (frame 0, instruction b00 - do nothing, first ACK is 0)
         byte[] discoveryRequest = new byte[2];
 
-        Debug.Log("Request packet: ");
-        ByteUtils.PrintByteArray(discoveryRequest);
+        Debug.Log("Request packet: " + ByteUtils.ByteArrayToString(discoveryRequest));
         Debug.Log("Sending data to server...");
         //Send data to server
         _udpClient.Send(discoveryRequest, 2);
@@ -55,8 +54,7 @@ public class ServerService : IServerService
         var receivedData = _udpClient.Receive(ref endpoint);
 
         Debug.Log("Receiving data from " + endpoint.ToString());
-        Debug.Log("Data recieved: ");
-        ByteUtils.PrintByteArray(receivedData);
+        Debug.Log("Data recieved: " + ByteUtils.ByteArrayToString(receivedData)); 
 
     }
 }

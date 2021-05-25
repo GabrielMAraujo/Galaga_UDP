@@ -5,8 +5,8 @@ using UnityEngine;
 
 public static class ByteUtils
 {
-    public static void PrintByteArray(byte[] byteArray)
+    public static string ByteArrayToString(byte[] byteArray)
     {
-        Debug.Log(BitConverter.ToString(byteArray).Replace("-", " "));
+        return BitConverter.ToString(byteArray).Replace("-", " ");
     }
 }
