@@ -21,6 +21,9 @@ public class ServerManager : MonoBehaviour
     {
         serverService.ConnectToServer();
         currentResponse = serverService.SendDiscoveryRequest();
+
+        Debug.Log(ByteUtils.BitArrayToString(new BitArray(currentResponse)));
+        PacketUtils.ParseResponseObject(currentResponse);
     }
 
     // Update is called once per frame
