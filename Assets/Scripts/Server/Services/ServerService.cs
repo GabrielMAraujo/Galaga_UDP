@@ -53,6 +53,20 @@ public class ServerService : IServerService
         return ByteUtils.XOR(responseData, secret);
     }
 
+    //Sends a request byte array to the UDP server
+    public byte[] SendRequest(byte[] request)
+    {
+        Debug.Log("Request packet: " + ByteUtils.ByteArrayToString(request));
+        Debug.Log("Sending data to server...");
+        //Send data to server
+        _udpClient.Send(request, 2);
+
+        var responseData = HandleResponse();
+
+        //Decodes message and return
+        return ByteUtils.XOR(responseData, secret);
+    }
+
     //Handle the server response
     private byte[] HandleResponse()
     {

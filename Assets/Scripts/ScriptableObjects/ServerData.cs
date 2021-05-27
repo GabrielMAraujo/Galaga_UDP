@@ -7,4 +7,5 @@ public class ServerData : ScriptableObject
 {
     public string ip;
     public int port;
+    public float timeWindow;
 }

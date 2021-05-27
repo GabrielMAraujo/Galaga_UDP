@@ -6,4 +6,5 @@ public interface IServerService
 {
     void ConnectToServer();
     byte[] SendDiscoveryRequest();
+    byte[] SendRequest(byte[] request);
 }
