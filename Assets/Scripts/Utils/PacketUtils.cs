@@ -29,11 +29,11 @@ public static class PacketUtils
 
         //Packet object count error verification
         //Get the response packet number of objects by seeing how many object 3 byte blocks are in the response
-        int packetObjectCount = (dataArray.Length - 3) / 3;
+        uint packetObjectCount = (uint)(dataArray.Length - 3) / 3;
         if(packetObjectCount != responseObject.ObjectCount)
         {
-            Debug.LogError("Response object count does not match the number of bytes in the response packet.");
-            return null;
+            Debug.LogWarning("Response object count does not match the number of bytes in the response packet. Rewriting object count by byte counting...");
+            responseObject.ObjectCount = packetObjectCount;
         }
 
         List<ServerObject> objectList = new List<ServerObject>();

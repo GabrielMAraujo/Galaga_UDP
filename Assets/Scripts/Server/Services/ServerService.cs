@@ -33,26 +33,6 @@ public class ServerService : IServerService
         _udpClient.Connect(endpoint);
     }
 
-    //Sends an initial, simple request to reverse-engineer the secret and start the game
-    public byte[] SendDiscoveryRequest()
-    {
-        //Discovery request is all zeroes (frame 0, instruction b00 - do nothing, first ACK is 0)
-        byte[] discoveryRequest = new byte[2];
-
-        Debug.Log("Request packet: " + ByteUtils.ByteArrayToString(discoveryRequest));
-        Debug.Log("Sending data to server...");
-        //Send data to server
-        _udpClient.Send(discoveryRequest, 2);
-
-        var responseData = HandleResponse();
-
-        //As it is the discovery request, extract the server secret
-        ExtractSecret(responseData);
-
-        //Decodes the response using the obtained secret and returns the decoded value
-        return ByteUtils.XOR(responseData, secret);
-    }
-
     //Sends a request byte array to the UDP server
     public byte[] SendRequest(byte[] request)
     {
@@ -62,6 +42,9 @@ public class ServerService : IServerService
         _udpClient.Send(request, 2);
 
         var responseData = HandleResponse();
+
+        //Every request has its own secret, re-extract secret
+        ExtractSecret(responseData);
 
         //Decodes message and return
         return ByteUtils.XOR(responseData, secret);

@@ -26,7 +26,9 @@ public class ServerManager : MonoBehaviour
     void Start()
     {
         serverService.ConnectToServer();
-        currentByteResponse = serverService.SendDiscoveryRequest();
+        //Discovery request is all zeroes (frame 0, instruction b00 - do nothing, first ACK is 0)
+        byte[] discoveryRequest = new byte[2];
+        currentByteResponse = serverService.SendRequest(discoveryRequest);
 
         //Debug.Log(ByteUtils.BitArrayToString(new BitArray(currentResponse)));
         currentResponse =  PacketUtils.ParseResponseObject(currentByteResponse);
