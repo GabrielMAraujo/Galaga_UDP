@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum InputTypeEnum
+public enum InputTypeEnum: byte
 {
     NOTHING = 0b_00,
     LEFT = 0b_01,
