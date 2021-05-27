@@ -16,4 +16,4 @@ MonoBehaviour:
   port: 1981
   sendTimeout: 2
   receiveTimeout: 2
-  timeWindow: 0.5
+  timeWindow: 0.6

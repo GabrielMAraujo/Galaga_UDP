@@ -28,13 +28,8 @@ public class ServerManager : MonoBehaviour
     void Start()
     {
         serverService.ConnectToServer();
-        //Discovery request is all zeroes (frame 0, instruction b00 - do nothing, first ACK is 0)
-        byte[] discoveryRequest = new byte[2];
-        currentByteResponse = serverService.SendRequest(discoveryRequest);
-
-        //Debug.Log(ByteUtils.BitArrayToString(new BitArray(currentResponse)));
-        currentResponse =  PacketUtils.ParseResponseObject(currentByteResponse);
-        gameManager.InstantiateObjects(currentResponse.Objects);
+        //Create first request
+        CreateRequest(InputTypeEnum.NOTHING, true);
     }
 
     // Update is called once per frame
@@ -49,19 +44,35 @@ public class ServerManager : MonoBehaviour
         }
         else
         {
-            //Emit default request with NOTHING input
+            //Create request with NOTHING input
+            CreateRequest(InputTypeEnum.NOTHING);
+        }
+    }
+
+    //Create request based on received input type and last response information (if not first request)
+    public void CreateRequest(InputTypeEnum input, bool firstRequest = false)
+    {
+        byte[] request;
+
+        if (!firstRequest)
+        {
             ServerPacketRequest req = new ServerPacketRequest(
                 currentResponse.Frame + 1,
-                InputTypeEnum.NOTHING,
+                input,
                 currentResponse.SEQ
             );
-            Debug.Log("Frame: " + req.Frame);
-            byte[] request = PacketUtils.ParseRequestObject(req);
-
-            currentByteResponse = serverService.SendRequest(request);
-            currentResponse = PacketUtils.ParseResponseObject(currentByteResponse);
-            gameManager.InstantiateObjects(currentResponse.Objects);
-            currentTimer = 0.5f;
+            request = PacketUtils.ParseRequestObject(req);
         }
+        else
+        {
+            //Discovery request is all zeroes (frame 0, instruction b00 - do nothing, first ACK is 0)
+            request = new byte[2];
+        }
+        
+
+        currentByteResponse = serverService.SendRequest(request);
+        currentResponse = PacketUtils.ParseResponseObject(currentByteResponse);
+        gameManager.InstantiateObjects(currentResponse.Objects);
+        currentTimer = serverData.timeWindow;
     }
 }

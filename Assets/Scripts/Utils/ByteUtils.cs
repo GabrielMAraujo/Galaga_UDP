@@ -31,6 +31,12 @@ public static class ByteUtils
     //Do a XOR operation with a byte array and a single byte
     public static byte[] XOR(byte[] array, byte b)
     {
+        if(array == null)
+        {
+            return null;
+        }
+
+
         byte[] xorArray = new byte[array.Length];
 
         for(int i = 0; i < array.Length; i++)
