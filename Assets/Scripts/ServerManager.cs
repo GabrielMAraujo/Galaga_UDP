@@ -20,11 +20,12 @@ public class ServerManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //serverService.ConnectToServer();
-        //currentResponse = serverService.SendDiscoveryRequest();
+        serverService.ConnectToServer();
+        currentResponse = serverService.SendDiscoveryRequest();
 
         //Debug.Log(ByteUtils.BitArrayToString(new BitArray(currentResponse)));
-        //PacketUtils.ParseResponseObject(currentResponse);
+        PacketUtils.ParseResponseObject(currentResponse);
+        PacketUtils.ParseResponseObject2(currentResponse);
 
         ServerPacketRequest req = new ServerPacketRequest(
             2,

@@ -10,48 +10,40 @@ public static class PacketUtils
     {
         ServerPacketResponse responseObject = new ServerPacketResponse();
 
-        //Stores the current bit window data
-        BitArray currentBitWindow;
+        //Frame - first 7 bits
+        responseObject.Frame = (uint)dataArray[0] >> 1;
 
-        //7 bits - frame
-        currentBitWindow = ByteUtils.ByteArrayToBitArray(dataArray, 0, 7);
-        //Debug.Log(ByteUtils.ByteArrayToString(ByteUtils.BitArrayToByteArray(currentBitWindow)));
-        responseObject.Frame = Convert.ToUInt32(ByteUtils.BitArrayToByteArray(currentBitWindow)[0]);
-        Debug.Log("Frame: " + responseObject.Frame);
+        //Input - 2 bits
+        //Last bit in byte 0 (shift left 1 bit to give space to second bit)
+        byte input = (byte)((dataArray[0] & 0x1) << 1);
+        //Add first bit in byte 1 to LSB of input
+        input = (byte)(input | (byte)(dataArray[1] >> 7));
+        responseObject.Input = (InputTypeEnum)input;
 
-        //2 bits - input
-        currentBitWindow = ByteUtils.ByteArrayToBitArray(dataArray, 7, 2);
-        responseObject.Input = (InputTypeEnum)ByteUtils.BitArrayToByteArray(currentBitWindow)[0];
-        Debug.Log("Input: " + responseObject.Input);
+        //SEQ - 7 bits
+        //Ignore MSB by AND with all bits except the MSB
+        responseObject.SEQ = (byte)(dataArray[1] & 0b_01111111);
 
-        //7 bits - SEQ
-        currentBitWindow = ByteUtils.ByteArrayToBitArray(dataArray, 9, 7);
-        responseObject.SEQ = currentBitWindow;
-        Debug.Log("SEQ: " + ByteUtils.ByteArrayToString(ByteUtils.BitArrayToByteArray(currentBitWindow)));
-        //8 bits - object count
-        currentBitWindow = ByteUtils.ByteArrayToBitArray(dataArray, 16, 8);
-        responseObject.ObjectCount = Convert.ToUInt32(ByteUtils.BitArrayToByteArray(currentBitWindow)[0]);
-        Debug.Log("Object count: " + responseObject.ObjectCount);
+        //Object count - 8 bits
+        responseObject.ObjectCount = dataArray[2];
 
         List<ServerObject> objectList = new List<ServerObject>();
         for (int i = 0; i < responseObject.ObjectCount; i++)
         {
             ServerObject so = new ServerObject();
-            //8 bits - type
-            currentBitWindow = ByteUtils.ByteArrayToBitArray(dataArray, 24 + (i * 24), 8);
-            so.Type = (ObjectTypeEnum)ByteUtils.BitArrayToByteArray(currentBitWindow)[0];
-            Debug.Log("Object " + (i + 1) + " - Type: " + so.Type);
 
-            //8 bits - horizontal position
-            currentBitWindow = ByteUtils.ByteArrayToBitArray(dataArray, 32 + (i * 24), 8);
-            so.XPos = Convert.ToUInt32(ByteUtils.BitArrayToByteArray(currentBitWindow)[0]);
-            Debug.Log("Object " + (i + 1) + " - XPos: " + so.XPos);
+            //Type - 8 bits
+            so.Type = (ObjectTypeEnum)dataArray[3 + (3 * i)];
 
-            //8 bits - vertical position
-            currentBitWindow = ByteUtils.ByteArrayToBitArray(dataArray, 40 + (i * 24), 8);
-            so.YPos = Convert.ToUInt32(ByteUtils.BitArrayToByteArray(currentBitWindow)[0]);
-            Debug.Log("Object " + (i + 1) + " - YPos: " + so.YPos);
+            //Horizontal position - 8 bits
+            so.XPos = dataArray[4 + (3 * i)];
+
+            //Vertical position - 8 bits
+            so.YPos = dataArray[5 + (3 * i)];
+
+            objectList.Add(so);
         }
+        responseObject.Objects = objectList;
 
         return responseObject;
     }
