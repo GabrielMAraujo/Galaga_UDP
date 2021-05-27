@@ -7,9 +7,6 @@ using UnityEngine;
 
 public class ServerService : IServerService
 {
-    private readonly string _ip;
-    private readonly int _port;
-
     //UDP communication references
     private readonly UdpClient _udpClient;
     private IPEndPoint endpoint;
@@ -17,13 +14,15 @@ public class ServerService : IServerService
     //Session 8-bit secret
     private byte secret;
 
-    public ServerService(string ip, int port)
+    public ServerService(ServerData serverData)
     {
-        _ip = ip;
-        _port = port;
-
         _udpClient = new UdpClient();
-        endpoint = new IPEndPoint(IPAddress.Parse(_ip), _port);
+
+        //Setting timeout limits
+        _udpClient.Client.SendTimeout = (int)(serverData.sendTimeout * 1000);
+        _udpClient.Client.ReceiveTimeout = (int)(serverData.receiveTimeout * 1000);
+
+        endpoint = new IPEndPoint(IPAddress.Parse(serverData.ip), serverData.port);
     }
 
     //Establishes a connection with the UDP server
@@ -44,7 +43,7 @@ public class ServerService : IServerService
         var responseData = HandleResponse();
 
         //Every request has its own secret, re-extract secret
-        ExtractSecret(responseData);
+        ExtractSecret(responseData, request);
 
         //Decodes message and return
         return ByteUtils.XOR(responseData, secret);
@@ -53,22 +52,33 @@ public class ServerService : IServerService
     //Handle the server response
     private byte[] HandleResponse()
     {
+        byte[] receivedData;
         //Receiving data from server
-        byte[] receivedData = _udpClient.Receive(ref endpoint);
+        try
+        {
+            receivedData = _udpClient.Receive(ref endpoint);
+        }
+        catch(SocketException e)
+        {
+            Debug.LogWarning("Socket response timed out: " + e.ToString());
+            return null;
+        }
 
         Debug.Log("Receiving data from " + endpoint.ToString());
-        Debug.Log("Data recieved: " + ByteUtils.ByteArrayToString(receivedData));
+        //Debug.Log("Data recieved: " + ByteUtils.ByteArrayToString(receivedData));
 
         return receivedData;
     }
 
-    //Reverse-engineers the 8-bit secret that encodes the server responses based on the discovery packet server response
-    private void ExtractSecret(byte[] discoveryResponse)
+    //Reverse-engineers the 8-bit secret that encodes the server responses based on the packet server response
+    private void ExtractSecret(byte[] responseData, byte[] requestData)
     {
-        //It is known that the first server response byte always has to be 0 (7 bits frame 0, input confirmation 00 first bit).
-        //With that information, it is possible to reverse-engineer the secret by XORing the first response bit with the byte 0.
-        //However, as any byte XOR 0 equals the same byte, we can directly assign the secret as the first request's first byte.
-        secret = discoveryResponse[0];
-        Debug.Log("Decoded secret: " + ByteUtils.ByteToString(secret));
+        if (responseData != null)
+        {
+            //It is known that the first server response byte always has to be frame (7 bits) + first bit of input, which has to be the same of request
+            //With that information, it is possible to reverse-engineer the secret by XORing the first response byte with the first request byte.
+            secret = (byte)(responseData[0] ^ requestData[0]);
+            Debug.Log("Decoded secret: " + ByteUtils.ByteToString(secret));
+        }
     }
 }

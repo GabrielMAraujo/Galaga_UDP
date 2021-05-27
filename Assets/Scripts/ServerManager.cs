@@ -18,7 +18,7 @@ public class ServerManager : MonoBehaviour
 
     private void Awake()
     {
-        serverService = new ServerService(serverData.ip, serverData.port);
+        serverService = new ServerService(serverData);
         currentTimer = serverData.timeWindow;
     }
 
@@ -37,25 +37,29 @@ public class ServerManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if(currentTimer > 0f)
-        //{
-        //    currentTimer -= Time.deltaTime;
-        //}
-        //else
-        //{
-        //    //Emit default request with NOTHING input
-        //    ServerPacketRequest req = new ServerPacketRequest(
-        //        currentResponse.Frame + 1,
-        //        InputTypeEnum.NOTHING,
-        //        currentResponse.SEQ
-        //    );
-        //    byte[] request = PacketUtils.ParseRequestObject(req);
+        if (currentTimer > 0f)
+        {
+            if (currentResponse != null)
+            {
+                currentTimer -= Time.deltaTime;
+            }
+        }
+        else
+        {
+            //Emit default request with NOTHING input
+            ServerPacketRequest req = new ServerPacketRequest(
+                currentResponse.Frame + 1,
+                InputTypeEnum.NOTHING,
+                currentResponse.SEQ
+            );
+            Debug.Log("Frame: " + req.Frame);
+            byte[] request = PacketUtils.ParseRequestObject(req);
 
-        //    currentByteResponse = serverService.SendRequest(request);
-        //    currentResponse = PacketUtils.ParseResponseObject(currentByteResponse);
+            currentByteResponse = serverService.SendRequest(request);
+            currentResponse = PacketUtils.ParseResponseObject(currentByteResponse);
 
-        //    currentTimer = 0.5f;
-        //}
+            currentTimer = 0.5f;
+        }
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //Emit default request with NOTHING input
