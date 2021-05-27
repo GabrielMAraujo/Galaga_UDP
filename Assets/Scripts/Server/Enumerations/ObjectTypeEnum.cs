@@ -6,6 +6,6 @@ public enum ObjectTypeEnum: byte
 {
     SHIP = 0b_0000_0000,
     PROJECTILE = 0b_0000_0001,
-    UNKNOWN = 0b_0000_0010,
-    UNKNOWN_2 = 0b_0000_0011
+    ENEMY_SHOOTER = 0b_0000_0010,
+    ENEMY_PROJECTILE = 0b_0000_0011
 }
