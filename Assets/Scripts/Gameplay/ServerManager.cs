@@ -87,7 +87,7 @@ public class ServerManager : MonoBehaviour
         }
         currentResponse = PacketUtils.ParseResponseObject(currentByteResponse);
 
-        gameManager.InstantiateObjects(currentResponse.Objects);
+        gameManager.UpdateObjects(currentResponse.Objects);
         currentTimer = serverData.timeWindow;
     }
 }

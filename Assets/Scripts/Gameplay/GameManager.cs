@@ -7,20 +7,27 @@ public class GameManager : MonoBehaviour
 {
     private ServerManager serverManager;
 
-    private List<GameObject> currentObjects = new List<GameObject>();
     private InputManager inputManager;
+    private GameplayObjectPool objectPool;
 
     private bool gameOver = false;
 
     private void Awake()
     {
         serverManager = GetComponent<ServerManager>();
+        objectPool = GameplayObjectPool.instance;
+
+        inputManager = InputManager.instance;
+        inputManager.OnInputDown += OnInputDown;
     }
 
     private void Start()
     {
-        inputManager = InputManager.instance;
-        inputManager.OnInputDown += OnInputDown;
+        //Create the ship, one enemy and one of each projectile instances in object pool at game start to improve performance
+        objectPool.CreateInstance(ObjectTypeEnum.SHIP);
+        objectPool.CreateInstance(ObjectTypeEnum.ENEMY_SHOOTER);
+        objectPool.CreateInstance(ObjectTypeEnum.PROJECTILE);
+        objectPool.CreateInstance(ObjectTypeEnum.ENEMY_PROJECTILE);
     }
 
     private void OnDestroy()
@@ -28,50 +35,22 @@ public class GameManager : MonoBehaviour
         inputManager.OnInputDown -= OnInputDown;
     }
 
-    //Temporary function - instantiates new objects and deletes old ones
-    public void InstantiateObjects(List<ServerObject> objects)
+    //Update object states (position and activeness)
+    public void UpdateObjects(List<ServerObject> objects)
     {
-        if (currentObjects.Count > 0)
-        {
-            foreach (var co in currentObjects)
-            {
-                Destroy(co);
-            }
-        }
-
-        currentObjects.Clear();
-
         if (IsVictory(objects) || !IsGameOver(objects))
         {
+            //Reset active states for instance reuse
+            objectPool.InactivateAllObjects();
 
             foreach (var obj in objects)
             {
-                GameObject instance = null;
-                switch (obj.Type)
-                {
-                    case ObjectTypeEnum.SHIP:
-                        instance = Instantiate(Resources.Load("Prefabs/Ship")) as GameObject;
-                        break;
-                    case ObjectTypeEnum.PROJECTILE:
-                        instance = Instantiate(Resources.Load("Prefabs/Projectile")) as GameObject;
-                        break;
-                    case ObjectTypeEnum.ENEMY_SHOOTER:
-                        instance = Instantiate(Resources.Load("Prefabs/Enemy Shooter")) as GameObject;
-                        break;
-                    case ObjectTypeEnum.ENEMY_PROJECTILE:
-                        instance = Instantiate(Resources.Load("Prefabs/Enemy Projectile")) as GameObject;
-                        break;
-                    case ObjectTypeEnum.FINAL_OBJECT:
-                        instance = Instantiate(Resources.Load("Prefabs/Final Object")) as GameObject;
-                        break;
-                    default:
-                        break;
-                }
+                GameObject instance = objectPool.GetInstance(obj.Type);
 
                 if (instance != null)
                 {
+                    instance.SetActive(true);
                     instance.GetComponent<GameplayObject>().Move(new Vector2Int((int)obj.XPos, (int)obj.YPos));
-                    currentObjects.Add(instance);
                 }
                 else
                 {
@@ -102,6 +81,7 @@ public class GameManager : MonoBehaviour
         //If there is not a ship in current object list, game over
         if(responseObjects.FirstOrDefault(o => o.Type == ObjectTypeEnum.SHIP) == null)
         {
+            objectPool.InactivateAllObjects();
             //Stop time to block request timer
             Time.timeScale = 0;
             gameOver = true;
