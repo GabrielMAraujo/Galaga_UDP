@@ -155,7 +155,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverData: {fileID: 11400000, guid: 125692698e8fd435892f47345d253c74, type: 2}
-  gameManager: {fileID: 110344931}
 --- !u!4 &110344930
 Transform:
   m_ObjectHideFlags: 0
@@ -182,7 +181,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6786e50dfcd624ae1a75540a2a976fbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverManager: {fileID: 110344929}
 --- !u!114 &110344932
 MonoBehaviour:
   m_ObjectHideFlags: 0

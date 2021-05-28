@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
         currentObjects.Clear();
 
-        if (!IsGameOver(objects))
+        if (IsVictory(objects) || !IsGameOver(objects))
         {
 
             foreach (var obj in objects)
@@ -61,6 +61,9 @@ public class GameManager : MonoBehaviour
                     case ObjectTypeEnum.ENEMY_PROJECTILE:
                         instance = Instantiate(Resources.Load("Prefabs/Enemy Projectile")) as GameObject;
                         break;
+                    case ObjectTypeEnum.FINAL_OBJECT:
+                        instance = Instantiate(Resources.Load("Prefabs/Enemy Projectile")) as GameObject;
+                        break;
                     default:
                         break;
                 }
@@ -78,8 +81,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //Checks for game over conditions
-    private bool IsGameOver(List<ServerObject> responseObjects)
+    //Checks for victory conditions
+    private bool IsVictory(List<ServerObject> responseObjects)
+    {
+        //If the first response object is a final object, player won
+        if(responseObjects[0].Type == ObjectTypeEnum.FINAL_OBJECT)
+        {
+            //Stop time to block request timer
+            Time.timeScale = 0;
+            gameOver = true;
+            Debug.Log("Victory");
+            return true;
+        }
+        return false;
+    }
+
+        //Checks for game over conditions
+        private bool IsGameOver(List<ServerObject> responseObjects)
     {
         //If there is not a ship in current object list, game over
         if(responseObjects.FirstOrDefault(o => o.Type == ObjectTypeEnum.SHIP) == null)
