@@ -5,16 +5,21 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public ServerManager serverManager;
+    private ServerManager serverManager;
 
     private List<GameObject> currentObjects = new List<GameObject>();
     private InputManager inputManager;
 
+    private bool gameOver = false;
 
     private void Awake()
     {
-        inputManager = InputManager.instance;
+        serverManager = GetComponent<ServerManager>();
+    }
 
+    private void Start()
+    {
+        inputManager = InputManager.instance;
         inputManager.OnInputDown += OnInputDown;
     }
 
@@ -81,7 +86,7 @@ public class GameManager : MonoBehaviour
         {
             //Stop time to block request timer
             Time.timeScale = 0;
-
+            gameOver = true;
             Debug.Log("Game over");
             return true;
         }
@@ -91,8 +96,11 @@ public class GameManager : MonoBehaviour
 
     private void OnInputDown(InputTypeEnum input)
     {
-        Debug.Log("Input: " + input);
-        //Create request with designated input
-        serverManager.CreateRequest(input);
+        if (!gameOver)
+        {
+            Debug.Log("Input: " + input);
+            //Create request with designated input
+            serverManager.CreateRequest(input);
+        }
     }
 }

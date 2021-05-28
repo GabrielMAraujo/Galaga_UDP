@@ -6,7 +6,7 @@ using UnityEngine;
 public class ServerManager : MonoBehaviour
 {
     public ServerData serverData;
-    public GameManager gameManager;
+    private GameManager gameManager;
 
 
     private ServerService serverService;
@@ -22,6 +22,7 @@ public class ServerManager : MonoBehaviour
     {
         serverService = new ServerService(serverData);
         currentTimer = serverData.timeWindow;
+        gameManager = GetComponent<GameManager>();
     }
 
     // Start is called before the first frame update
@@ -29,7 +30,8 @@ public class ServerManager : MonoBehaviour
     {
         serverService.ConnectToServer();
         //Create first request
-        CreateRequest(InputTypeEnum.NOTHING, true);
+        //First request is all zeroes (frame 0, instruction b00 - do nothing, first ACK is 0)
+        CreateRequest(InputTypeEnum.NOTHING, new byte[2]);
     }
 
     // Update is called once per frame
@@ -49,12 +51,20 @@ public class ServerManager : MonoBehaviour
         }
     }
 
-    //Create request based on received input type and last response information (if not first request)
-    public void CreateRequest(InputTypeEnum input, bool firstRequest = false)
+    //Create request based on received input type and last response information. It can also recieve the byte array to be sent directly
+    public void CreateRequest(InputTypeEnum input, byte[] byteRequest = null)
     {
+        //If server is already communicating, ignore input
+        //TODO - input bus
+        if (serverService.IsCommunicating())
+        {
+            Debug.Log("Package ignored, communication already happening");
+            return;
+        }
+
         byte[] request;
 
-        if (!firstRequest)
+        if (byteRequest == null)
         {
             ServerPacketRequest req = new ServerPacketRequest(
                 currentResponse.Frame + 1,
@@ -65,13 +75,31 @@ public class ServerManager : MonoBehaviour
         }
         else
         {
-            //Discovery request is all zeroes (frame 0, instruction b00 - do nothing, first ACK is 0)
-            request = new byte[2];
+            request = byteRequest;
         }
         
 
         currentByteResponse = serverService.SendRequest(request);
+
+        if(currentByteResponse == null)
+        {
+            Debug.Log("Resending last package...");
+            //CreateRequest(InputTypeEnum.NOTHING, request);
+            return;
+        }
+        if (currentResponse != null)
+        {
+            Debug.Log("Frame: " + currentResponse.Frame);
+        }
+
+        if(!PacketUtils.IsPacketValid(currentByteResponse))
+        {
+            Debug.Log("Resending last package...");
+            CreateRequest(InputTypeEnum.NOTHING, request);
+            return;
+        }
         currentResponse = PacketUtils.ParseResponseObject(currentByteResponse);
+
         gameManager.InstantiateObjects(currentResponse.Objects);
         currentTimer = serverData.timeWindow;
     }

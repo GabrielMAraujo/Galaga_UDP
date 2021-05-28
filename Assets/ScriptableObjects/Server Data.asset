@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ip: 18.219.219.134
   port: 1981
-  sendTimeout: 2
-  receiveTimeout: 2
-  timeWindow: 0.6
+  sendTimeout: 0.4
+  receiveTimeout: 0.4
+  timeWindow: 0.5

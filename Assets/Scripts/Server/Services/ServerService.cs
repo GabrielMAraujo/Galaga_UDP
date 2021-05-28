@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ServerService : IServerService
 {
@@ -11,8 +12,11 @@ public class ServerService : IServerService
     private readonly UdpClient _udpClient;
     private IPEndPoint endpoint;
 
-    //Session 8-bit secret
+    //Request 8-bit secret
     private byte secret;
+
+    //Request blocking flag
+    private bool communicating = false;
 
     public ServerService(ServerData serverData)
     {
@@ -37,10 +41,26 @@ public class ServerService : IServerService
     {
         Debug.Log("Request packet: " + ByteUtils.ByteArrayToString(request));
         Debug.Log("Sending data to server...");
+
         //Send data to server
-        _udpClient.Send(request, 2);
+        //Receiving data from server
+        try
+        {
+            _udpClient.Send(request, 2);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning("Socket exception: " + e.ToString());
+            return null;
+        }
 
         var responseData = HandleResponse();
+
+        if(responseData == null)
+        {
+            Debug.Log("Response data invalid. Resending request...");
+            return null;
+        }
 
         //Every request has its own secret, re-extract secret
         ExtractSecret(responseData, request);
@@ -60,12 +80,10 @@ public class ServerService : IServerService
         }
         catch(SocketException e)
         {
-            Debug.LogWarning("Socket response timed out: " + e.ToString());
+            Debug.LogWarning("Socket exception: " + e.ToString());
             return null;
         }
-
-        Debug.Log("Receiving data from " + endpoint.ToString());
-        //Debug.Log("Data recieved: " + ByteUtils.ByteArrayToString(receivedData));
+        Debug.Log("Data recieved: " + ByteUtils.ByteArrayToString(receivedData));
 
         return receivedData;
     }
@@ -80,5 +98,11 @@ public class ServerService : IServerService
             secret = (byte)(responseData[0] ^ requestData[0]);
             Debug.Log("Decoded secret: " + ByteUtils.ByteToString(secret));
         }
+    }
+
+    //Shows if there is already an open communication with server
+    public bool IsCommunicating()
+    {
+        return communicating;
     }
 }

@@ -8,6 +8,11 @@ public static class PacketUtils
     //Parses byte array into an appropriate response object
     public static ServerPacketResponse ParseResponseObject(byte[] dataArray)
     {
+        if(dataArray == null)
+        {
+            return null;
+        }
+
         ServerPacketResponse responseObject = new ServerPacketResponse();
 
         //Frame - first 7 bits
@@ -26,15 +31,6 @@ public static class PacketUtils
 
         //Object count - 8 bits
         responseObject.ObjectCount = dataArray[2];
-
-        //Packet object count error verification
-        //Get the response packet number of objects by seeing how many object 3 byte blocks are in the response
-        uint packetObjectCount = (uint)(dataArray.Length - 3) / 3;
-        if(packetObjectCount != responseObject.ObjectCount)
-        {
-            Debug.LogWarning("Response object count does not match the number of bytes in the response packet. Rewriting object count by byte counting...");
-            responseObject.ObjectCount = packetObjectCount;
-        }
 
         List<ServerObject> objectList = new List<ServerObject>();
         for (int i = 0; i < responseObject.ObjectCount; i++)
@@ -84,5 +80,27 @@ public static class PacketUtils
         result[1] = currentByte;
 
         return result;
+    }
+
+    //Verifies if the recieved package is valid
+    public static bool IsPacketValid(byte[] dataArray)
+    {
+        if(dataArray == null)
+        {
+            return false;
+        }
+
+        //Packet object count error verification
+        //Get the response packet number of objects by seeing how many object 3 byte blocks are in the response
+        uint packetObjectCount = (uint)(dataArray.Length - 3) / 3;
+        uint expectedCount = dataArray[2];
+
+        if (packetObjectCount != expectedCount)
+        {
+            Debug.LogWarning("Response object count does not match the number of bytes in the response packet. Package with error.");
+            return false;
+        }
+
+        return true;
     }
 }
