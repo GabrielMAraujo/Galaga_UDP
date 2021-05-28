@@ -6,5 +6,4 @@ public interface IServerService
 {
     void ConnectToServer();
     byte[] SendRequest(byte[] request);
-    bool IsCommunicating();
 }

@@ -15,9 +15,6 @@ public class ServerService : IServerService
     //Request 8-bit secret
     private byte secret;
 
-    //Request blocking flag
-    private bool communicating = false;
-
     public ServerService(ServerData serverData)
     {
         _udpClient = new UdpClient();
@@ -58,7 +55,6 @@ public class ServerService : IServerService
 
         if(responseData == null)
         {
-            Debug.Log("Response data invalid. Resending request...");
             return null;
         }
 
@@ -98,11 +94,5 @@ public class ServerService : IServerService
             secret = (byte)(responseData[0] ^ requestData[0]);
             Debug.Log("Decoded secret: " + ByteUtils.ByteToString(secret));
         }
-    }
-
-    //Shows if there is already an open communication with server
-    public bool IsCommunicating()
-    {
-        return communicating;
     }
 }

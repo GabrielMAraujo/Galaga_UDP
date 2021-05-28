@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
                         instance = Instantiate(Resources.Load("Prefabs/Enemy Projectile")) as GameObject;
                         break;
                     case ObjectTypeEnum.FINAL_OBJECT:
-                        instance = Instantiate(Resources.Load("Prefabs/Enemy Projectile")) as GameObject;
+                        instance = Instantiate(Resources.Load("Prefabs/Final Object")) as GameObject;
                         break;
                     default:
                         break;
@@ -96,8 +96,8 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
-        //Checks for game over conditions
-        private bool IsGameOver(List<ServerObject> responseObjects)
+    //Checks for game over conditions
+    private bool IsGameOver(List<ServerObject> responseObjects)
     {
         //If there is not a ship in current object list, game over
         if(responseObjects.FirstOrDefault(o => o.Type == ObjectTypeEnum.SHIP) == null)

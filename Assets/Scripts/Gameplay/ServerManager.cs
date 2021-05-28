@@ -37,6 +37,7 @@ public class ServerManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Default request timer. If no input is registered in this time, the default request is sent
         if (currentTimer > 0f)
         {
             if (currentResponse != null)
@@ -51,17 +52,9 @@ public class ServerManager : MonoBehaviour
         }
     }
 
-    //Create request based on received input type and last response information. It can also recieve the byte array to be sent directly
+    //Create request based on received input type and last response information. It can also directly recieve the byte array to be sent
     public void CreateRequest(InputTypeEnum input, byte[] byteRequest = null)
     {
-        //If server is already communicating, ignore input
-        //TODO - input bus
-        if (serverService.IsCommunicating())
-        {
-            Debug.Log("Package ignored, communication already happening");
-            return;
-        }
-
         byte[] request;
 
         if (byteRequest == null)
@@ -78,20 +71,14 @@ public class ServerManager : MonoBehaviour
             request = byteRequest;
         }
         
-
         currentByteResponse = serverService.SendRequest(request);
 
-        if(currentByteResponse == null)
-        {
-            Debug.Log("Resending last package...");
-            //CreateRequest(InputTypeEnum.NOTHING, request);
-            return;
-        }
         if (currentResponse != null)
         {
             Debug.Log("Frame: " + currentResponse.Frame);
         }
 
+        //Check for response packet validation. If not valid, resend package
         if(!PacketUtils.IsPacketValid(currentByteResponse))
         {
             Debug.Log("Resending last package...");
