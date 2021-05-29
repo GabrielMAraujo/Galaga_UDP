@@ -18,6 +18,8 @@ public class GameplayObjectPool : MonoBehaviour
     {
         if (instance == null)
             instance = this;
+        else
+            Destroy(gameObject);
 
         enemyPool = new List<GameObject>();
         projectilePool = new List<GameObject>();

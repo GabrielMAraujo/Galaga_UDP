@@ -17,12 +17,19 @@ public class ServerManager : MonoBehaviour
 
     //Request time window
     private float currentTimer;
+    private bool gameOver = false;
 
     private void Awake()
     {
         serverService = new ServerService(serverData);
         currentTimer = serverData.timeWindow;
-        gameManager = GetComponent<GameManager>();
+        gameManager = GameManager.instance;
+        gameManager.OnGameOver += OnGameOver;
+    }
+
+    private void OnDestroy()
+    {
+        gameManager.OnGameOver -= OnGameOver;
     }
 
     // Start is called before the first frame update
@@ -37,19 +44,27 @@ public class ServerManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Default request timer. If no input is registered in this time, the default request is sent
-        if (currentTimer > 0f)
+        if (!gameOver)
         {
-            if (currentResponse != null)
+            //Default request timer. If no input is registered in this time, the default request is sent
+            if (currentTimer > 0f)
             {
-                currentTimer -= Time.deltaTime;
+                if (currentResponse != null)
+                {
+                    currentTimer -= Time.deltaTime;
+                }
+            }
+            else
+            {
+                //Create request with NOTHING input
+                CreateRequest(InputTypeEnum.NOTHING);
             }
         }
-        else
-        {
-            //Create request with NOTHING input
-            CreateRequest(InputTypeEnum.NOTHING);
-        }
+    }
+
+    private void OnGameOver(bool winner)
+    {
+        gameOver = true;
     }
 
     //Create request based on received input type and last response information. It can also directly recieve the byte array to be sent

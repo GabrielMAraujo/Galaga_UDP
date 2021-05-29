@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+//Callback for game events
+public delegate void GameOverCallback(bool winner);
+
 public class GameManager : MonoBehaviour
 {
+    public event GameOverCallback OnGameOver;
+    public static GameManager instance;
+
     private ServerManager serverManager;
 
     private InputManager inputManager;
@@ -14,8 +20,19 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        if (instance == null)
+            instance = this;
+        else
+            Destroy(gameObject);
+
         serverManager = GetComponent<ServerManager>();
+
         objectPool = GameplayObjectPool.instance;
+        //Create the ship, one enemy and one of each projectile instances in object pool at game start to improve performance
+        objectPool.CreateInstance(ObjectTypeEnum.SHIP);
+        objectPool.CreateInstance(ObjectTypeEnum.ENEMY_SHOOTER);
+        objectPool.CreateInstance(ObjectTypeEnum.PROJECTILE);
+        objectPool.CreateInstance(ObjectTypeEnum.ENEMY_PROJECTILE);
 
         inputManager = InputManager.instance;
         inputManager.OnInputDown += OnInputDown;
@@ -23,11 +40,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        //Create the ship, one enemy and one of each projectile instances in object pool at game start to improve performance
-        objectPool.CreateInstance(ObjectTypeEnum.SHIP);
-        objectPool.CreateInstance(ObjectTypeEnum.ENEMY_SHOOTER);
-        objectPool.CreateInstance(ObjectTypeEnum.PROJECTILE);
-        objectPool.CreateInstance(ObjectTypeEnum.ENEMY_PROJECTILE);
+
     }
 
     private void OnDestroy()
@@ -66,9 +79,8 @@ public class GameManager : MonoBehaviour
         //If the first response object is a final object, player won
         if(responseObjects[0].Type == ObjectTypeEnum.FINAL_OBJECT)
         {
-            //Stop time to block request timer
-            Time.timeScale = 0;
             gameOver = true;
+            OnGameOver?.Invoke(true);
             Debug.Log("Victory");
             return true;
         }
@@ -82,9 +94,8 @@ public class GameManager : MonoBehaviour
         if(responseObjects.FirstOrDefault(o => o.Type == ObjectTypeEnum.SHIP) == null)
         {
             objectPool.InactivateAllObjects();
-            //Stop time to block request timer
-            Time.timeScale = 0;
             gameOver = true;
+            OnGameOver?.Invoke(false);
             Debug.Log("Game over");
             return true;
         }
