@@ -39,5 +39,21 @@ public class InputManager : MonoBehaviour
         {
             OnInputDown?.Invoke(InputTypeEnum.SHOOT);
         }
+
+        //Menu inputs
+        if (Input.GetButtonDown("Up"))
+        {
+            OnInputDown?.Invoke(InputTypeEnum.UP);
+        }
+
+        if (Input.GetButtonDown("Down"))
+        {
+            OnInputDown?.Invoke(InputTypeEnum.DOWN);
+        }
+
+        if (Input.GetButtonDown("Select"))
+        {
+            OnInputDown?.Invoke(InputTypeEnum.SELECT);
+        }
     }
 }
