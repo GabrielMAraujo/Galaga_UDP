@@ -8,6 +8,7 @@ public class ServerManager : MonoBehaviour
 {
     public ServerData serverData;
     private GameManager gameManager;
+    private AudioManager audioManager;
 
 
     private ServerService serverService;
@@ -28,6 +29,7 @@ public class ServerManager : MonoBehaviour
         currentTimer = serverData.timeWindow;
         gameManager = GameManager.instance;
         gameManager.OnGameOver += OnGameOver;
+        audioManager = GetComponent<AudioManager>();
     }
 
     private void OnDestroy()
@@ -127,6 +129,11 @@ public class ServerManager : MonoBehaviour
         currentResponse = PacketUtils.ParseResponseObject(currentByteResponse);
 
         gameManager.UpdateObjects(currentResponse.Objects);
+        //SFX handling
+        if (input == InputTypeEnum.SHOOT)
+        {
+            audioManager.PlayProjectile();
+        }
         currentTimer = serverData.timeWindow;
     }
 }
