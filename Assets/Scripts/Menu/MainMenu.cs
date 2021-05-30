@@ -12,6 +12,7 @@ public class MainMenu : MonoBehaviour
     private InputManager inputManager;
 
     private int selectedOption = 0;
+    private bool inInstructions = false;
 
     private void Awake()
     {
@@ -39,18 +40,28 @@ public class MainMenu : MonoBehaviour
 
     private void OnInputDown(InputTypeEnum input)
     {
-        if(input == InputTypeEnum.DOWN)
+        if (!inInstructions)
         {
-            selectedOption++;
-        }
-        else if(input == InputTypeEnum.UP)
-        {
-            selectedOption--;
+            if (input == InputTypeEnum.DOWN)
+            {
+                selectedOption++;
+            }
+            else if (input == InputTypeEnum.UP)
+            {
+                selectedOption--;
+            }
         }
 
-        else if (input == InputTypeEnum.SELECT)
+        if (input == InputTypeEnum.SELECT)
         {
-            SelectMenuItem();
+            if (!inInstructions)
+            {
+                SelectMenuItem();
+            }
+            else
+            {
+                CloseInstructions();
+            }
         }
 
         CheckPointerWrap();
@@ -65,7 +76,16 @@ public class MainMenu : MonoBehaviour
 
     public void GoToInstructions()
     {
+        pointer.gameObject.SetActive(false);
+        inInstructions = true;
         SceneManager.LoadScene("Instructions", LoadSceneMode.Additive);
+    }
+
+    public void CloseInstructions()
+    {
+        pointer.gameObject.SetActive(true);
+        inInstructions = false;
+        SceneManager.UnloadSceneAsync("Instructions");
     }
 
     //Check if pointer has to wrap (e.g. down on last item goes back to first item)

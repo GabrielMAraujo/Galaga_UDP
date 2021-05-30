@@ -107,9 +107,13 @@ public class GameManager : MonoBehaviour
     {
         if (!gameOver)
         {
-            Debug.Log("Input: " + input);
-            //Create request with designated input
-            serverManager.CreateRequest(input);
+            //Only valid game inputs are from 0 through 3(shoot)
+            if(input <= InputTypeEnum.SHOOT)
+            {
+                Debug.Log("Input: " + input);
+                //Create request with designated input
+                serverManager.CreateRequest(input);
+            }
         }
     }
 }
