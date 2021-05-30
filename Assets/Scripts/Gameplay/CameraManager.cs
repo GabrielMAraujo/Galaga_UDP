@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CameraManager : MonoBehaviour
 {
@@ -49,13 +50,10 @@ public class CameraManager : MonoBehaviour
             {
                 transform.position = cameraData.animationTarget;
                 mainCamera.orthographicSize = cameraData.animationFinalScale;
+                //Call winner UI scene
+                SceneManager.LoadScene("Winner", LoadSceneMode.Additive);
+                gameOver = false;
             }
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            OnGameOver(true);
         }
     }
 
