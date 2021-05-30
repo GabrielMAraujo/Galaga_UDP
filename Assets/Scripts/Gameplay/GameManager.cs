@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 //Callback for game events
 public delegate void GameOverCallback(bool winner);
@@ -97,6 +98,8 @@ public class GameManager : MonoBehaviour
             gameOver = true;
             OnGameOver?.Invoke(false);
             Debug.Log("Game over");
+            //Instantiate game over scene
+            SceneManager.LoadScene("Game Over", LoadSceneMode.Additive);
             return true;
         }
 

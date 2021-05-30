@@ -4,13 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 
 //Contains basic functions for menu option selection and pointer navigation
-public class MenuBase : MonoBehaviour
+public abstract class MenuBase : MonoBehaviour
 {
     public Image pointer;
     public List<Text> optionsList;
 
     protected bool inInstructions = false;
     protected int selectedOption = 0;
+    protected int pointerXPos = 0;
 
     private InputManager inputManager;
 
@@ -53,7 +54,7 @@ public class MenuBase : MonoBehaviour
     //Updates pointer position according to selected option
     protected void UpdatePointer()
     {
-        pointer.transform.position = new Vector2(40, optionsList[selectedOption].transform.position.y);
+        pointer.transform.position = new Vector2(pointerXPos, optionsList[selectedOption].transform.position.y);
     }
 
     //Check if pointer has to wrap (e.g. down on last item goes back to first item)
@@ -68,5 +69,8 @@ public class MenuBase : MonoBehaviour
             selectedOption = optionsList.Count - 1;
         }
     }
+
+    //Every child class has to implement what has to be done when selecting the menu items
+    protected abstract void SelectMenuItem();
 
 }

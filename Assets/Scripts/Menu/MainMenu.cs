@@ -7,6 +7,12 @@ using UnityEngine.UI;
 public class MainMenu : MenuBase
 {
 
+    protected override void Start()
+    {
+        pointerXPos = 40;
+        base.Start();
+    }
+
     protected override void OnInputDown(InputTypeEnum input)
     {
         base.OnInputDown(input);
@@ -44,7 +50,7 @@ public class MainMenu : MenuBase
     }
 
     //Select actions for each menu item
-    private void SelectMenuItem()
+    protected override void SelectMenuItem()
     {
         switch (selectedOption)
         {
