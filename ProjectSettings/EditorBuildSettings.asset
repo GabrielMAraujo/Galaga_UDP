@@ -20,4 +20,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Winner.unity
     guid: 72ebf35abe114479bbf40b3191464102
+  - enabled: 1
+    path: Assets/Scenes/Server Desync.unity
+    guid: 9af8cdf732cee418894a95528bf13e7d
   m_configObjects: {}

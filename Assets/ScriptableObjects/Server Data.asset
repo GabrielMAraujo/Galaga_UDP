@@ -16,4 +16,5 @@ MonoBehaviour:
   port: 1981
   sendTimeout: 0.4
   receiveTimeout: 0.4
+  maximumTries: 3
   timeWindow: 0.5

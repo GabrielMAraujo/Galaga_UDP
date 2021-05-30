@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ServerManager : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class ServerManager : MonoBehaviour
     //Request time window
     private float currentTimer;
     private bool gameOver = false;
+    //Counts how many request were tried
+    private int tryCount = 0;
 
     private void Awake()
     {
@@ -72,6 +75,8 @@ public class ServerManager : MonoBehaviour
     {
         byte[] request;
 
+        tryCount++;
+
         if (byteRequest == null)
         {
             ServerPacketRequest req = new ServerPacketRequest(
@@ -96,10 +101,29 @@ public class ServerManager : MonoBehaviour
         //Check for response packet validation. If not valid, resend package
         if(!PacketUtils.IsPacketValid(currentByteResponse))
         {
-            Debug.Log("Resending last package...");
-            CreateRequest(InputTypeEnum.NOTHING, request);
+            if (tryCount <= serverData.maximumTries)
+            {
+                Debug.Log("Resending last package...");
+                CreateRequest(InputTypeEnum.NOTHING, request);
+            }
+            //If exceeded the amount of tries, stop trying and emit the server desync modal
+            else
+            {
+                Debug.LogWarning("Maximum amount of tries exceeded");
+                gameOver = true;
+                gameManager.gameOver = true;
+                SceneManager.LoadScene("Server Desync", LoadSceneMode.Additive);
+            }
+
             return;
         }
+        else
+        {
+            //Valid packet, reset maximum try count
+            tryCount = 0;
+        }
+
+
         currentResponse = PacketUtils.ParseResponseObject(currentByteResponse);
 
         gameManager.UpdateObjects(currentResponse.Objects);

@@ -10,6 +10,7 @@ public class ServerData : ScriptableObject
 
     public float sendTimeout;
     public float receiveTimeout;
+    public int maximumTries;
 
     public float timeWindow;
 }

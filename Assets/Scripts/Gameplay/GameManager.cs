@@ -11,13 +11,12 @@ public class GameManager : MonoBehaviour
 {
     public event GameOverCallback OnGameOver;
     public static GameManager instance;
+    public bool gameOver = false;
 
     private ServerManager serverManager;
 
     private InputManager inputManager;
     private GameplayObjectPool objectPool;
-
-    private bool gameOver = false;
 
     private void Awake()
     {
